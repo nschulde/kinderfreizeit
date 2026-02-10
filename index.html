@@ -1,74 +1,94 @@
-<!DOCTYPE html><html lang="de">
+<!DOCTYPE html>
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <title>Kinderfreizeit Olympiade – Medaillenspiegel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white h-screen overflow-hidden">
-<div class="grid grid-cols-1 md:grid-cols-2 h-full relative"><div class="p-8 flex flex-col justify-center">
-<h1 class="text-4xl font-bold mb-10 text-center">🏅 Kinderfreizeit-Olympiade 🏅</h1>
-<div id="clock" class="absolute top-4 right-4 text-3xl font-mono bg-black/40 px-4 py-2 rounded-xl shadow">00:00:00</div><!-- MEDAILLENSPIEGEL HORIZONTAL --><div class="space-y-6"><div class="flex justify-between items-center bg-blue-600 rounded-2xl p-6 shadow-xl">
-  <h2 class="text-2xl font-bold">🔵 Team Blau</h2>
-  <div class="flex gap-6 text-xl">
-    <span>🥇 <span id="blue-gold">0</span></span>
-    <span>🥈 <span id="blue-silver">0</span></span>
-    <span>🥉 <span id="blue-bronze">0</span></span>
+<body class="bg-gray-900 text-white min-h-screen">
+
+<div class="flex flex-col md:flex-row min-h-screen relative">
+    
+  <div id="clock" class="absolute top-4 right-4 text-2xl md:text-3xl font-mono bg-black/50 px-4 py-2 rounded-xl shadow-lg z-10">
+    00:00:00
   </div>
-</div><div class="flex justify-between items-center bg-yellow-400 text-black rounded-2xl p-6 shadow-xl">
-  <h2 class="text-2xl font-bold">🟡 Team Gelb</h2>
-  <div class="flex gap-6 text-xl">
-    <span>🥇 <span id="yellow-gold">0</span></span>
-    <span>🥈 <span id="yellow-silver">0</span></span>
-    <span>🥉 <span id="yellow-bronze">0</span></span>
-  </div>
-</div><div class="flex justify-between items-center bg-gray-800 rounded-2xl p-6 shadow-xl">
-  <h2 class="text-2xl font-bold">⚫ Team Schwarz</h2>
-  <div class="flex gap-6 text-xl">
-    <span>🥇 <span id="black-gold">0</span></span>
-    <span>🥈 <span id="black-silver">0</span></span>
-    <span>🥉 <span id="black-bronze">0</span></span>
-  </div>
-</div><div class="flex justify-between items-center bg-green-600 rounded-2xl p-6 shadow-xl">
-  <h2 class="text-2xl font-bold">🟢 Team Grün</h2>
-  <div class="flex gap-6 text-xl">
-    <span>🥇 <span id="green-gold">0</span></span>
-    <span>🥈 <span id="green-silver">0</span></span>
-    <span>🥉 <span id="green-bronze">0</span></span>
-  </div>
-</div><div class="flex justify-between items-center bg-red-600 rounded-2xl p-6 shadow-xl">
-  <h2 class="text-2xl font-bold">🔴 Team Rot</h2>
-  <div class="flex gap-6 text-xl">
-    <span>🥇 <span id="red-gold">0</span></span>
-    <span>🥈 <span id="red-silver">0</span></span>
-    <span>🥉 <span id="red-bronze">0</span></span>
-  </div>
-</div></div>
-</div><!-- RECHTE SEITE: TAGESABLAUF --><div class="bg-gray-800 p-8 flex flex-col justify-center">
-  <h2 class="text-4xl font-bold mb-8 text-center">📅 Tagesablauf</h2>  <div class="space-y-6 text-2xl">
-    <div class="flex justify-between border-b border-gray-600 pb-2">
-      <span>08:30</span><span>Ankommen & Begrüßung</span>
-    </div>
-    <div class="flex justify-between border-b border-gray-600 pb-2">
-      <span>09:00</span><span>Morgenandacht</span>
-    </div>
-    <div class="flex justify-between border-b border-gray-600 pb-2">
-      <span>10:00</span><span>Olympia‑Spiele</span>
-    </div>
-    <div class="flex justify-between border-b border-gray-600 pb-2">
-      <span>12:00</span><span>Mittagessen</span>
-    </div>
-    <div class="flex justify-between border-b border-gray-600 pb-2">
-      <span>14:00</span><span>Workshops</span>
-    </div>
-    <div class="flex justify-between border-b border-gray-600 pb-2">
-      <span>17:00</span><span>Abschluss & Segen</span>
+
+  <div class="w-full md:w-1/2 p-6 flex flex-col justify-center border-b md:border-b-0 md:border-r border-gray-700">
+    <h1 class="text-3xl md:text-4xl font-bold mb-8 text-center pt-10 md:pt-0">🏅 Medaillenspiegel 🏅</h1>
+    
+    <div class="space-y-4 max-w-lg mx-auto w-full">
+      <div class="flex justify-between items-center bg-blue-600 rounded-2xl p-4 md:p-6 shadow-xl">
+        <h2 class="text-xl md:text-2xl font-bold">🔵 Blau</h2>
+        <div class="flex gap-4 md:gap-6 text-lg md:text-xl">
+          <span>🥇 <span id="blue-gold">0</span></span>
+          <span>🥈 <span id="blue-silver">0</span></span>
+          <span>🥉 <span id="blue-bronze">0</span></span>
+        </div>
+      </div>
+      <div class="flex justify-between items-center bg-yellow-400 text-black rounded-2xl p-4 md:p-6 shadow-xl">
+        <h2 class="text-xl md:text-2xl font-bold">🟡 Gelb</h2>
+        <div class="flex gap-4 md:gap-6 text-lg md:text-xl">
+          <span>🥇 <span id="yellow-gold">0</span></span>
+          <span>🥈 <span id="yellow-silver">0</span></span>
+          <span>🥉 <span id="yellow-bronze">0</span></span>
+        </div>
+      </div>
+      <div class="flex justify-between items-center bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl">
+        <h2 class="text-xl md:text-2xl font-bold">⚫ Schwarz</h2>
+        <div class="flex gap-4 md:gap-6 text-lg md:text-xl">
+          <span>🥇 <span id="black-gold">0</span></span>
+          <span>🥈 <span id="black-silver">0</span></span>
+          <span>🥉 <span id="black-bronze">0</span></span>
+        </div>
+      </div>
+      <div class="flex justify-between items-center bg-green-600 rounded-2xl p-4 md:p-6 shadow-xl">
+        <h2 class="text-xl md:text-2xl font-bold">🟢 Grün</h2>
+        <div class="flex gap-4 md:gap-6 text-lg md:text-xl">
+          <span>🥇 <span id="green-gold">0</span></span>
+          <span>🥈 <span id="green-silver">0</span></span>
+          <span>🥉 <span id="green-bronze">0</span></span>
+        </div>
+      </div>
+      <div class="flex justify-between items-center bg-red-600 rounded-2xl p-4 md:p-6 shadow-xl">
+        <h2 class="text-xl md:text-2xl font-bold">🔴 Rot</h2>
+        <div class="flex gap-4 md:gap-6 text-lg md:text-xl">
+          <span>🥇 <span id="red-gold">0</span></span>
+          <span>🥈 <span id="red-silver">0</span></span>
+          <span>🥉 <span id="red-bronze">0</span></span>
+        </div>
+      </div>
     </div>
   </div>
+
+  <div class="w-full md:w-1/2 bg-gray-800 p-6 flex flex-col justify-center">
+    <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center pt-6 md:pt-0">📅 Tagesablauf</h2>
+    <div class="space-y-4 md:space-y-6 text-xl md:text-2xl max-w-lg mx-auto w-full">
+      <div class="flex justify-between border-b border-gray-600 pb-2">
+        <span class="font-bold text-blue-400">08:30</span><span>Ankommen</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-600 pb-2">
+        <span class="font-bold text-blue-400">09:00</span><span>Morgenandacht</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-600 pb-2">
+        <span class="font-bold text-blue-400">10:00</span><span>Olympia-Spiele</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-600 pb-2">
+        <span class="font-bold text-blue-400">12:00</span><span>Mittagessen</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-600 pb-2">
+        <span class="font-bold text-blue-400">14:00</span><span>Workshops</span>
+      </div>
+      <div class="flex justify-between border-b border-gray-600 pb-2">
+        <span class="font-bold text-blue-400">17:00</span><span>Abschluss & Segen</span>
+      </div>
+    </div>
+  </div>
+
 </div>
-  <button onclick="resetAll()" class="bg-white text-black px-6 py-2 rounded-xl font-bold shadow">🔄 Alles zurücksetzen</button>
-</div><script>
-// 👉 HIER DIE MEDAILLEN EINTRAGEN (1x pro Tag anpassen)
+
+<script>
+// 👉 HIER DIE MEDAILLEN EINTRAGEN
 const data = {
   blue:   { gold: 3, silver: 2, bronze: 1 },
   yellow: { gold: 2, silver: 3, bronze: 2 },
@@ -77,24 +97,26 @@ const data = {
   red:    { gold: 2, silver: 1, bronze: 4 }
 };
 
-// Medaillen anzeigen
+// Medaillen in die HTML-Elemente schreiben
 for (const team in data) {
   for (const medal in data[team]) {
-    document.getElementById(${team}-${medal}).innerText = data[team][medal];
+    const el = document.getElementById(`${team}-${medal}`);
+    if(el) el.innerText = data[team][medal];
   }
 }
 
-// Live-Uhr (HH:MM:SS)
+// Live-Uhr Funktion
 function updateClock() {
   const now = new Date();
   const h = String(now.getHours()).padStart(2, '0');
   const m = String(now.getMinutes()).padStart(2, '0');
   const s = String(now.getSeconds()).padStart(2, '0');
-  document.getElementById('clock').innerText = ${h}:${m}:${s};
+  document.getElementById('clock').innerText = `${h}:${m}:${s}`;
 }
 
 setInterval(updateClock, 1000);
 updateClock();
-</script></div>
+</script>
+
 </body>
 </html>
