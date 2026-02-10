@@ -6,81 +6,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
+<body class="bg-gray-900 text-white min-h-screen font-sans">
 
 <div class="flex flex-col md:flex-row min-h-screen relative">
     
-  <div id="clock" class="absolute top-4 right-4 text-2xl md:text-3xl font-mono bg-black/50 px-4 py-2 rounded-xl shadow-lg z-10">
+  <div id="clock" class="absolute top-4 right-4 text-2xl md:text-4xl font-mono bg-black/60 px-6 py-3 rounded-xl shadow-lg z-20 border border-gray-700">
     00:00:00
   </div>
 
-  <div class="w-full md:w-1/2 p-6 flex flex-col justify-center border-b md:border-b-0 md:border-r border-gray-700">
-    <h1 class="text-3xl md:text-4xl font-bold mb-8 text-center pt-10 md:pt-0">🏅 Medaillenspiegel 🏅</h1>
+  <div class="w-full md:w-1/2 p-4 md:p-12 flex flex-col justify-center border-b md:border-b-0 md:border-r border-gray-700">
+    <h1 class="text-3xl md:text-6xl font-extrabold mb-8 md:mb-12 text-center pt-12 md:pt-0 tracking-tight">
+      🏅 Medaillenspiegel
+    </h1>
     
-    <div class="space-y-4 max-w-lg mx-auto w-full">
-      <div class="flex justify-between items-center bg-blue-600 rounded-2xl p-4 md:p-6 shadow-xl">
-        <h2 class="text-xl md:text-2xl font-bold">🔵 Blau</h2>
-        <div class="flex gap-4 md:gap-6 text-lg md:text-xl">
-          <span>🥇 <span id="blue-gold">0</span></span>
-          <span>🥈 <span id="blue-silver">0</span></span>
-          <span>🥉 <span id="blue-bronze">0</span></span>
-        </div>
+    <div id="scoreboard" class="space-y-4 md:space-y-6 w-full max-w-md md:max-w-3xl mx-auto">
       </div>
-      <div class="flex justify-between items-center bg-yellow-400 text-black rounded-2xl p-4 md:p-6 shadow-xl">
-        <h2 class="text-xl md:text-2xl font-bold">🟡 Gelb</h2>
-        <div class="flex gap-4 md:gap-6 text-lg md:text-xl">
-          <span>🥇 <span id="yellow-gold">0</span></span>
-          <span>🥈 <span id="yellow-silver">0</span></span>
-          <span>🥉 <span id="yellow-bronze">0</span></span>
-        </div>
-      </div>
-      <div class="flex justify-between items-center bg-gray-800 rounded-2xl p-4 md:p-6 shadow-xl">
-        <h2 class="text-xl md:text-2xl font-bold">⚫ Schwarz</h2>
-        <div class="flex gap-4 md:gap-6 text-lg md:text-xl">
-          <span>🥇 <span id="black-gold">0</span></span>
-          <span>🥈 <span id="black-silver">0</span></span>
-          <span>🥉 <span id="black-bronze">0</span></span>
-        </div>
-      </div>
-      <div class="flex justify-between items-center bg-green-600 rounded-2xl p-4 md:p-6 shadow-xl">
-        <h2 class="text-xl md:text-2xl font-bold">🟢 Grün</h2>
-        <div class="flex gap-4 md:gap-6 text-lg md:text-xl">
-          <span>🥇 <span id="green-gold">0</span></span>
-          <span>🥈 <span id="green-silver">0</span></span>
-          <span>🥉 <span id="green-bronze">0</span></span>
-        </div>
-      </div>
-      <div class="flex justify-between items-center bg-red-600 rounded-2xl p-4 md:p-6 shadow-xl">
-        <h2 class="text-xl md:text-2xl font-bold">🔴 Rot</h2>
-        <div class="flex gap-4 md:gap-6 text-lg md:text-xl">
-          <span>🥇 <span id="red-gold">0</span></span>
-          <span>🥈 <span id="red-silver">0</span></span>
-          <span>🥉 <span id="red-bronze">0</span></span>
-        </div>
-      </div>
-    </div>
   </div>
 
-  <div class="w-full md:w-1/2 bg-gray-800 p-6 flex flex-col justify-center">
-    <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center pt-6 md:pt-0">📅 Tagesablauf</h2>
-    <div class="space-y-4 md:space-y-6 text-xl md:text-2xl max-w-lg mx-auto w-full">
-      <div class="flex justify-between border-b border-gray-600 pb-2">
-        <span class="font-bold text-blue-400">08:30</span><span>Ankommen</span>
+  <div class="w-full md:w-1/2 bg-gray-800 p-4 md:p-12 flex flex-col justify-center">
+    <h2 class="text-3xl md:text-5xl font-bold mb-8 md:mb-12 text-center pt-8 md:pt-0 text-gray-200">
+      📅 Tagesablauf
+    </h2>
+    
+    <div class="space-y-4 md:space-y-8 text-xl md:text-3xl w-full max-w-md md:max-w-3xl mx-auto">
+      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
+        <span class="font-bold text-blue-400">08:30</span><span class="text-gray-300">Ankommen</span>
       </div>
-      <div class="flex justify-between border-b border-gray-600 pb-2">
-        <span class="font-bold text-blue-400">09:00</span><span>Morgenandacht</span>
+      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
+        <span class="font-bold text-blue-400">09:00</span><span class="text-gray-300">Morgenandacht</span>
       </div>
-      <div class="flex justify-between border-b border-gray-600 pb-2">
-        <span class="font-bold text-blue-400">10:00</span><span>Olympia-Spiele</span>
+      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
+        <span class="font-bold text-blue-400">10:00</span><span class="text-gray-300">Olympia-Spiele</span>
       </div>
-      <div class="flex justify-between border-b border-gray-600 pb-2">
-        <span class="font-bold text-blue-400">12:00</span><span>Mittagessen</span>
+      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
+        <span class="font-bold text-blue-400">12:00</span><span class="text-gray-300">Mittagessen</span>
       </div>
-      <div class="flex justify-between border-b border-gray-600 pb-2">
-        <span class="font-bold text-blue-400">14:00</span><span>Workshops</span>
+      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
+        <span class="font-bold text-blue-400">14:00</span><span class="text-gray-300">Workshops</span>
       </div>
-      <div class="flex justify-between border-b border-gray-600 pb-2">
-        <span class="font-bold text-blue-400">17:00</span><span>Abschluss & Segen</span>
+      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
+        <span class="font-bold text-blue-400">17:00</span><span class="text-gray-300">Abschluss & Segen</span>
       </div>
     </div>
   </div>
@@ -88,24 +53,64 @@
 </div>
 
 <script>
-// 👉 HIER DIE MEDAILLEN EINTRAGEN
-const data = {
-  blue:   { gold: 3, silver: 2, bronze: 1 },
-  yellow: { gold: 2, silver: 3, bronze: 2 },
-  black:  { gold: 1, silver: 1, bronze: 3 },
-  green:  { gold: 4, silver: 2, bronze: 0 },
-  red:    { gold: 2, silver: 1, bronze: 4 }
-};
+// ==========================================
+// 👉 HIER DIE DATEN EINTRAGEN
+// ==========================================
+const teamData = [
+  { id: 'blue',   name: 'Team Blau',    gold: 3, silver: 2, bronze: 1, colorClass: 'bg-blue-600 text-white' },
+  { id: 'yellow', name: 'Team Gelb',    gold: 2, silver: 3, bronze: 2, colorClass: 'bg-yellow-400 text-black' },
+  { id: 'black',  name: 'Team Schwarz', gold: 5, silver: 1, bronze: 3, colorClass: 'bg-gray-950 text-white border border-gray-600' },
+  { id: 'green',  name: 'Team Grün',    gold: 4, silver: 2, bronze: 0, colorClass: 'bg-green-600 text-white' },
+  { id: 'red',    name: 'Team Rot',     gold: 2, silver: 1, bronze: 4, colorClass: 'bg-red-600 text-white' }
+];
 
-// Medaillen in die HTML-Elemente schreiben
-for (const team in data) {
-  for (const medal in data[team]) {
-    const el = document.getElementById(`${team}-${medal}`);
-    if(el) el.innerText = data[team][medal];
-  }
+// ==========================================
+// LOGIK: SORTIEREN & RENDERN
+// ==========================================
+
+function renderScoreboard() {
+  const container = document.getElementById('scoreboard');
+  container.innerHTML = ''; // Liste leeren
+
+  // 1. Sortieren (Gold -> Silber -> Bronze)
+  teamData.sort((a, b) => {
+    if (b.gold !== a.gold) return b.gold - a.gold;     // Mehr Gold zuerst
+    if (b.silver !== a.silver) return b.silver - a.silver; // Dann Silber
+    return b.bronze - a.bronze;                        // Dann Bronze
+  });
+
+  // 2. HTML generieren
+  teamData.forEach((team, index) => {
+    // Platzierungssymbol (Pokal für den 1. Platz)
+    let rankIcon = `<span class="opacity-50 font-mono w-6 text-right">${index + 1}.</span>`;
+    if (index === 0) rankIcon = `<span class="text-2xl">🏆</span>`;
+
+    const html = `
+      <div class="flex justify-between items-center ${team.colorClass} rounded-2xl p-4 md:p-8 shadow-xl transition-transform hover:scale-[1.02]">
+        <div class="flex items-center gap-4">
+          ${rankIcon}
+          <h2 class="text-xl md:text-4xl font-bold truncate">${team.name}</h2>
+        </div>
+        <div class="flex gap-3 md:gap-8 text-lg md:text-3xl font-bold bg-black/20 px-4 py-2 rounded-xl backdrop-blur-sm">
+          <span class="flex items-center gap-1 md:gap-2" title="Gold">
+            🥇 <span>${team.gold}</span>
+          </span>
+          <span class="flex items-center gap-1 md:gap-2 opacity-90" title="Silber">
+            🥈 <span>${team.silver}</span>
+          </span>
+          <span class="flex items-center gap-1 md:gap-2 opacity-80" title="Bronze">
+            🥉 <span>${team.bronze}</span>
+          </span>
+        </div>
+      </div>
+    `;
+    container.innerHTML += html;
+  });
 }
 
-// Live-Uhr Funktion
+// ==========================================
+// UHRZEIT
+// ==========================================
 function updateClock() {
   const now = new Date();
   const h = String(now.getHours()).padStart(2, '0');
@@ -114,9 +119,11 @@ function updateClock() {
   document.getElementById('clock').innerText = `${h}:${m}:${s}`;
 }
 
+// Initialer Start
+renderScoreboard();
 setInterval(updateClock, 1000);
 updateClock();
-</script>
 
+</script>
 </body>
 </html>
