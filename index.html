@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Kinderfreizeit Olympiade – Medaillenspiegel</title>
+  <title>Kinderfreizeit Olympiade – Live</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -10,120 +10,114 @@
 
 <div class="flex flex-col md:flex-row min-h-screen relative">
     
-  <div id="clock" class="absolute top-4 right-4 text-2xl md:text-4xl font-mono bg-black/60 px-6 py-3 rounded-xl shadow-lg z-20 border border-gray-700">
+  <div id="clock" class="absolute top-4 right-4 text-2xl md:text-4xl font-mono bg-black/60 px-6 py-3 rounded-xl shadow-lg z-20 border border-gray-700 backdrop-blur-md">
     00:00:00
   </div>
 
-  <div class="w-full md:w-1/2 p-4 md:p-12 flex flex-col justify-center border-b md:border-b-0 md:border-r border-gray-700">
+  <div class="w-full md:w-1/2 p-4 md:p-12 flex flex-col justify-center border-b md:border-b-0 md:border-r border-gray-700 relative">
+    
+    <div id="loading-medals" class="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+    </div>
+
     <h1 class="text-3xl md:text-6xl font-extrabold mb-8 md:mb-12 text-center pt-12 md:pt-0 tracking-tight">
       🏅 Medaillenspiegel
     </h1>
     
-    <div id="scoreboard" class="space-y-4 md:space-y-6 w-full max-w-md md:max-w-3xl mx-auto">
+    <div id="scoreboard" class="space-y-4 md:space-y-6 w-full max-w-md md:max-w-3xl mx-auto transition-all duration-500">
       </div>
   </div>
 
-  <div class="w-full md:w-1/2 bg-gray-800 p-4 md:p-12 flex flex-col justify-center">
+  <div class="w-full md:w-1/2 bg-gray-800 p-4 md:p-12 flex flex-col justify-center relative">
     <h2 class="text-3xl md:text-5xl font-bold mb-8 md:mb-12 text-center pt-8 md:pt-0 text-gray-200">
       📅 Tagesablauf
     </h2>
     
-    <div class="space-y-4 md:space-y-8 text-xl md:text-3xl w-full max-w-md md:max-w-3xl mx-auto">
-      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
-        <span class="font-bold text-blue-400">08:30</span><span class="text-gray-300">Ankommen</span>
-      </div>
-      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
-        <span class="font-bold text-blue-400">09:00</span><span class="text-gray-300">Morgenandacht</span>
-      </div>
-      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
-        <span class="font-bold text-blue-400">10:00</span><span class="text-gray-300">Olympia-Spiele</span>
-      </div>
-      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
-        <span class="font-bold text-blue-400">12:00</span><span class="text-gray-300">Mittagessen</span>
-      </div>
-      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
-        <span class="font-bold text-blue-400">14:00</span><span class="text-gray-300">Workshops</span>
-      </div>
-      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5">
-        <span class="font-bold text-blue-400">17:00</span><span class="text-gray-300">Abschluss & Segen</span>
-      </div>
+    <div id="schedule-list" class="space-y-4 md:space-y-8 text-xl md:text-3xl w-full max-w-md md:max-w-3xl mx-auto">
+      <div class="text-center text-gray-400">Lade Termine...</div>
     </div>
   </div>
 
 </div>
 
 <script>
-// ==========================================
-// 👉 HIER DIE DATEN EINTRAGEN
-// ==========================================
-const teamData = [
-  { id: 'blue',   name: 'Team Blau',    gold: 3, silver: 2, bronze: 1, colorClass: 'bg-blue-600 text-white' },
-  { id: 'yellow', name: 'Team Gelb',    gold: 2, silver: 3, bronze: 2, colorClass: 'bg-yellow-400 text-black' },
-  { id: 'black',  name: 'Team Schwarz', gold: 5, silver: 1, bronze: 3, colorClass: 'bg-gray-950 text-white border border-gray-600' },
-  { id: 'green',  name: 'Team Grün',    gold: 4, silver: 2, bronze: 0, colorClass: 'bg-green-600 text-white' },
-  { id: 'red',    name: 'Team Rot',     gold: 2, silver: 1, bronze: 4, colorClass: 'bg-red-600 text-white' }
-];
+// =================================================================
+// 👇 HIER DEINE CSV-LINKS EINFÜGEN (Zwischen die Anführungszeichen)
+// =================================================================
+const URL_MEDAILLEN = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTl8ONEJhICDqDwsal3S1JazhwpI80LhIDD3MdpDiW1T4MJlL8RzX9k4Pq703VY12qRJpzOeZcpD8ZV/pub?gid=0&single=true&output=csv";
+const URL_ABLAUF    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTl8ONEJhICDqDwsal3S1JazhwpI80LhIDD3MdpDiW1T4MJlL8RzX9k4Pq703VY12qRJpzOeZcpD8ZV/pub?gid=1373310417&single=true&output=csv";
+
+// Konfiguration der Farben basierend auf dem Team-Namen im Google Sheet
+// Der Name im Sheet muss exakt (oder teilweise) mit dem Schlüssel hier übereinstimmen.
+const colorMap = {
+  'blau':    'bg-blue-600 text-white',
+  'gelb':    'bg-yellow-400 text-black',
+  'schwarz': 'bg-gray-950 text-white border border-gray-600',
+  'grün':    'bg-green-600 text-white',
+  'rot':     'bg-red-600 text-white',
+  'orange':  'bg-orange-500 text-white', // Falls mal ein Team dazu kommt
+  'weiß':    'bg-white text-black'
+};
 
 // ==========================================
-// LOGIK: SORTIEREN & RENDERN
+// FUNKTION: DATEN LADEN UND VERARBEITEN
 // ==========================================
 
-function renderScoreboard() {
-  const container = document.getElementById('scoreboard');
-  container.innerHTML = ''; // Liste leeren
+async function loadData() {
+  try {
+    // 1. Medaillen laden
+    if(URL_MEDAILLEN.startsWith("http")) {
+      const res = await fetch(URL_MEDAILLEN);
+      const text = await res.text();
+      processMedals(text);
+      document.getElementById('loading-medals').classList.add('hidden'); // Ladekreis weg
+    }
 
-  // 1. Sortieren (Gold -> Silber -> Bronze)
-  teamData.sort((a, b) => {
-    if (b.gold !== a.gold) return b.gold - a.gold;     // Mehr Gold zuerst
-    if (b.silver !== a.silver) return b.silver - a.silver; // Dann Silber
-    return b.bronze - a.bronze;                        // Dann Bronze
-  });
+    // 2. Ablauf laden
+    if(URL_ABLAUF.startsWith("http")) {
+      const res = await fetch(URL_ABLAUF);
+      const text = await res.text();
+      processSchedule(text);
+    }
 
-  // 2. HTML generieren
-  teamData.forEach((team, index) => {
-    // Platzierungssymbol (Pokal für den 1. Platz)
-    let rankIcon = `<span class="opacity-50 font-mono w-6 text-right">${index + 1}.</span>`;
-    if (index === 0) rankIcon = `<span class="text-2xl">🏆</span>`;
+  } catch (error) {
+    console.error("Fehler beim Laden:", error);
+  }
+}
 
-    const html = `
-      <div class="flex justify-between items-center ${team.colorClass} rounded-2xl p-4 md:p-8 shadow-xl transition-transform hover:scale-[1.02]">
-        <div class="flex items-center gap-4">
-          ${rankIcon}
-          <h2 class="text-xl md:text-4xl font-bold truncate">${team.name}</h2>
-        </div>
-        <div class="flex gap-3 md:gap-8 text-lg md:text-3xl font-bold bg-black/20 px-4 py-2 rounded-xl backdrop-blur-sm">
-          <span class="flex items-center gap-1 md:gap-2" title="Gold">
-            🥇 <span>${team.gold}</span>
-          </span>
-          <span class="flex items-center gap-1 md:gap-2 opacity-90" title="Silber">
-            🥈 <span>${team.silver}</span>
-          </span>
-          <span class="flex items-center gap-1 md:gap-2 opacity-80" title="Bronze">
-            🥉 <span>${team.bronze}</span>
-          </span>
-        </div>
-      </div>
-    `;
-    container.innerHTML += html;
+// Hilfsfunktion: CSV Text in Array umwandeln
+function csvToArray(str) {
+  const rows = str.trim().split('\n');
+  return rows.map(row => {
+    // Einfache CSV Trennung (berücksichtigt keine Kommas innerhalb von Texten)
+    return row.split(',').map(cell => cell.replace(/"/g, '').trim());
   });
 }
 
-// ==========================================
-// UHRZEIT
-// ==========================================
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  const s = String(now.getSeconds()).padStart(2, '0');
-  document.getElementById('clock').innerText = `${h}:${m}:${s}`;
-}
+function processMedals(csvText) {
+  const rows = csvToArray(csvText);
+  // Wir nehmen an: Zeile 1 ist Header. Ab Zeile 2 kommen Daten.
+  // Spalten-Reihenfolge im Sheet muss sein: Teamname, Gold, Silber, Bronze
+  
+  const teams = [];
+  
+  // Start bei Index 1 (Index 0 ist die Überschrift)
+  for (let i = 1; i < rows.length; i++) {
+    const cols = rows[i];
+    if (cols.length < 4) continue; // Leere Zeilen überspringen
 
-// Initialer Start
-renderScoreboard();
-setInterval(updateClock, 1000);
-updateClock();
+    const name = cols[0];
+    const gold = parseInt(cols[1]) || 0;
+    const silver = parseInt(cols[2]) || 0;
+    const bronze = parseInt(cols[3]) || 0;
 
-</script>
-</body>
-</html>
+    // Farbe bestimmen (sucht nach Schlüsselwörtern im Namen)
+    let cssClass = 'bg-gray-700 text-white'; // Fallback
+    const nameLower = name.toLowerCase();
+    
+    for (const key in colorMap) {
+      if (nameLower.includes(key)) {
+        cssClass = colorMap[key];
+        break; // Gefunden
+      }
+    }
