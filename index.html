@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Kinderfreizeit Olympiade – Live-Dashboard</title>
+  <title>Kinderfreizeit Olympiade – Flexibles Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -15,12 +15,12 @@
   </div>
 
   <div class="w-full md:w-1/2 p-4 md:p-12 flex flex-col justify-center border-b md:border-b-0 md:border-r border-gray-700">
-    <h1 class="text-3xl md:text-6xl font-extrabold mb-8 md:mb-12 text-center pt-12 md:pt-0 tracking-tight text-white">
+    <h1 class="text-3xl md:text-6xl font-extrabold mb-8 md:mb-12 text-center pt-12 md:pt-0 tracking-tight">
       🏅 Medaillenspiegel
     </h1>
     
     <div id="scoreboard" class="space-y-4 md:space-y-6 w-full max-w-md md:max-w-3xl mx-auto">
-      <p class="text-center animate-pulse text-xl">Lade Medaillendaten...</p>
+      <p class="text-center animate-pulse text-xl">Daten werden geladen...</p>
     </div>
   </div>
 
@@ -28,71 +28,62 @@
     <h2 class="text-3xl md:text-5xl font-bold mb-8 md:mb-12 text-center pt-8 md:pt-0 text-gray-200">
       📅 Tagesablauf
     </h2>
-    
     <div id="schedule" class="space-y-4 md:space-y-8 text-xl md:text-3xl w-full max-w-md md:max-w-3xl mx-auto">
-      <p class="text-center animate-pulse text-xl text-gray-400">Lade Zeitplan...</p>
-    </div>
+      </div>
   </div>
 
 </div>
 
 <script>
-// ==========================================
-// KONFIGURATION (Deine Google Sheets URLs)
-// ==========================================
+// URLS DEINER GOOGLE SHEETS (CSV EXPORT)
 const MEDAL_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTl8ONEJhICDqDwsal3S1JazhwpI80LhIDD3MdpDiW1T4MJlL8RzX9k4Pq703VY12qRJpzOeZcpD8ZV/pub?gid=0&single=true&output=csv';
 const SCHEDULE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTl8ONEJhICDqDwsal3S1JazhwpI80LhIDD3MdpDiW1T4MJlL8RzX9k4Pq703VY12qRJpzOeZcpD8ZV/pub?gid=1373310417&single=true&output=csv';
 
-// Hilfsfunktion: Erkennt Farbe basierend auf dem Teamnamen
-function getTeamColorClass(name) {
-  const n = name.toLowerCase();
-  if (n.includes('blau')) return 'bg-blue-600 text-white';
-  if (n.includes('gelb')) return 'bg-yellow-400 text-black';
-  if (n.includes('schwarz')) return 'bg-gray-950 text-white border border-gray-600';
-  if (n.includes('grün') || n.includes('gruen')) return 'bg-green-600 text-white';
-  if (n.includes('rot')) return 'bg-red-600 text-white';
-  return 'bg-gray-700 text-white'; // Standard
-}
-
-// Hilfsfunktion: CSV Text in Array umwandeln
 function parseCSV(text) {
   return text.split('\n')
              .map(line => line.split(',').map(cell => cell.trim()))
              .filter(row => row.length > 1 && row[0] !== "");
 }
 
-// ==========================================
-// HAUPTFUNKTION: DATEN LADEN & ANZEIGEN
-// ==========================================
 async function updateDashboard() {
   try {
-    // 1. MEDAILLEN LADEN
+    // 1. MEDAILLEN & TEAMS LADEN
     const medalResponse = await fetch(MEDAL_CSV_URL);
     const medalText = await medalResponse.text();
     const medalRows = parseCSV(medalText).slice(1); // Header überspringen
 
     const teams = medalRows.map(row => ({
-      name: row[0],
-      gold: parseInt(row[1]) || 0,
+      name:  row[0] || 'Unbekanntes Team',
+      gold:   parseInt(row[1]) || 0,
       silver: parseInt(row[2]) || 0,
-      bronze: parseInt(row[3]) || 0
+      bronze: parseInt(row[3]) || 0,
+      flag:   row[4] || '', // Spalte E
+      color:  row[5] || '#4b5563' // Spalte F (Standardgrau wenn leer)
     }));
 
-    // Sortieren: Gold > Silber > Bronze
+    // Sortierung nach Gold > Silber > Bronze
     teams.sort((a, b) => (b.gold - a.gold) || (b.silver - a.silver) || (b.bronze - a.bronze));
 
     const scoreboardContainer = document.getElementById('scoreboard');
     scoreboardContainer.innerHTML = teams.map((team, index) => {
-      let rankIcon = `<span class="opacity-50 font-mono w-6 text-right">${index + 1}.</span>`;
-      if (index === 0) rankIcon = `<span class="text-2xl">🏆</span>`;
+      
+      // Platzhalter oder Flagge
+      const flagContent = team.flag 
+        ? `<img src="${team.flag}" class="w-10 h-10 md:w-16 md:h-16 object-contain rounded shadow-sm" alt="Flagge">`
+        : `<div class="w-10 h-10 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center text-sm md:text-xl font-bold">${index + 1}</div>`;
+
+      // Textfarbe bestimmen (Hell für dunkle Hintergründe, Dunkel für Gelb)
+      const textColor = (team.color.toLowerCase() === '#yellow' || team.color.toLowerCase() === '#ffff00' || team.name.toLowerCase().includes('gelb')) 
+        ? 'text-black' : 'text-white';
 
       return `
-        <div class="flex justify-between items-center ${getTeamColorClass(team.name)} rounded-2xl p-4 md:p-8 shadow-xl transition-transform">
-          <div class="flex items-center gap-4">
-            ${rankIcon}
-            <h2 class="text-xl md:text-4xl font-bold truncate">${team.name}</h2>
+        <div class="flex justify-between items-center rounded-2xl p-4 md:p-8 shadow-2xl transition-all duration-500" 
+             style="background-color: ${team.color};">
+          <div class="flex items-center gap-4 md:gap-8">
+            ${flagContent}
+            <h2 class="text-xl md:text-5xl font-extrabold ${textColor} truncate drop-shadow-sm">${team.name}</h2>
           </div>
-          <div class="flex gap-3 md:gap-8 text-lg md:text-3xl font-bold bg-black/20 px-4 py-2 rounded-xl backdrop-blur-sm">
+          <div class="flex gap-3 md:gap-8 text-lg md:text-4xl font-black bg-black/20 px-4 py-2 rounded-2xl backdrop-blur-md ${textColor}">
             <span>🥇 ${team.gold}</span>
             <span class="opacity-90">🥈 ${team.silver}</span>
             <span class="opacity-80">🥉 ${team.bronze}</span>
@@ -104,7 +95,7 @@ async function updateDashboard() {
     // 2. ZEITPLAN LADEN
     const scheduleResponse = await fetch(SCHEDULE_CSV_URL);
     const scheduleText = await scheduleResponse.text();
-    const scheduleRows = parseCSV(scheduleText).slice(1); // Header überspringen
+    const scheduleRows = parseCSV(scheduleText).slice(1);
 
     const scheduleContainer = document.getElementById('schedule');
     scheduleContainer.innerHTML = scheduleRows.map(row => `
@@ -115,25 +106,19 @@ async function updateDashboard() {
     `).join('');
 
   } catch (error) {
-    console.error("Fehler beim Laden der Daten:", error);
+    console.error("Fehler:", error);
   }
 }
 
-// ==========================================
-// UHRZEIT & AUTO-REFRESH
-// ==========================================
 function updateClock() {
   const now = new Date();
   document.getElementById('clock').innerText = now.toLocaleTimeString('de-DE');
 }
 
-// Initialer Aufruf
 updateDashboard();
 updateClock();
-
-// Intervalle
 setInterval(updateClock, 1000);
-setInterval(updateDashboard, 30000); // Alle 30 Sekunden Daten neu laden
+setInterval(updateDashboard, 60000); // Alle 60 Sek. aktualisieren
 </script>
 </body>
 </html>
