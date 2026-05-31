@@ -44,7 +44,7 @@
       📅 Tagesablauf
     </h2>
     
-    <div id="schedule" class="space-y-4 md:space-y-8 text-xl md:text-3xl w-full max-w-md md:max-w-3xl mx-auto">
+    <div id="schedule" class="space-y-3 md:space-y-5 text-xl md:text-3xl w-full max-w-md md:max-w-3xl mx-auto">
       <p class="text-center animate-pulse text-xl text-gray-400">Lade Zeitplan...</p>
     </div>
   </div>
@@ -77,7 +77,7 @@ const SCHEDULE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTl8ON
 function parseCSV(text) {
   return text.split('\n')
              .map(line => line.split(',').map(cell => cell.trim()))
-             .filter(row => row.length > 1 && row[0] !== "");
+             .filter(row => row.length > 0 && row[0] !== "");
 }
 
 async function updateDashboard() {
@@ -99,10 +99,8 @@ async function updateDashboard() {
 
     const scoreboardContainer = document.getElementById('scoreboard');
     scoreboardContainer.innerHTML = teams.map((team, index) => {
-      // Design-Daten aus der Konfiguration oben holen
       const config = TEAM_CONFIG[team.name] || TEAM_CONFIG["Standard"];
       
-      // Prüfen ob Flagge ein Emoji oder eine Bild-URL ist
       const flagContent = config.flag.startsWith('http') 
         ? `<img src="${config.flag}" class="team-flag rounded-lg">` 
         : `<div class="team-flag">${config.flag}</div>`;
@@ -125,16 +123,15 @@ async function updateDashboard() {
       `;
     }).join('');
 
-    // 2. ZEITPLAN LADEN
+    // 2. ZEITPLAN LADEN (Jetzt ohne Uhrzeit)
     const scheduleResponse = await fetch(SCHEDULE_CSV_URL);
     const scheduleText = await scheduleResponse.text();
     const scheduleRows = parseCSV(scheduleText).slice(1);
 
     const scheduleContainer = document.getElementById('schedule');
     scheduleContainer.innerHTML = scheduleRows.map(row => `
-      <div class="flex justify-between border-b border-gray-600 pb-3 md:pb-5 items-baseline">
-        <span class="font-bold text-blue-400 tabular-nums">${row[0]}</span>
-        <span class="text-gray-300 text-right ml-4">${row[1]}</span>
+      <div class="border-b border-gray-600 pb-3 md:pb-5 text-center md:text-left">
+        <span class="text-gray-200 font-medium">${row[0]}</span>
       </div>
     `).join('');
 
