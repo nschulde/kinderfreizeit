@@ -9,13 +9,18 @@
     body { font-family: system-ui, sans-serif; max-width: 60rem; margin: 0 auto; padding: 1.5rem;
            background: #111827; color: #f9fafb; line-height: 1.5; }
     h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.1rem; margin-top: 1.5rem; }
     input, button { font-size: 1rem; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #4b5563; }
     input { width: 100%; box-sizing: border-box; background: #1f2937; color: #f9fafb; margin-bottom: 0.75rem; }
     button { background: #2563eb; color: white; border: none; cursor: pointer; font-weight: 600; }
-    pre { background: #1f2937; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.85rem; }
+    pre { background: #1f2937; padding: 0.75rem; border-radius: 0.5rem; overflow-x: auto;
+          font-size: 0.8rem; white-space: pre-wrap; word-break: break-all; }
+    .step { border-left: 3px solid #4b5563; padding-left: 1rem; margin: 1rem 0; }
     .ok { color: #4ade80; font-weight: 700; }
     .fail { color: #f87171; font-weight: 700; }
+    .warn { color: #fbbf24; font-weight: 700; }
     .hint { color: #9ca3af; font-size: 0.9rem; }
+    #verdict { margin-top: 2rem; padding: 1rem; border-radius: 0.5rem; background: #1f2937; }
   </style>
 </head>
 <body>
@@ -24,89 +29,170 @@
 
 <p class="hint">
   Diese Seite prüft nur eins: Darf der Browser die Excel-Datei aus deinem OneDrive laden?
-  Sie ändert nichts am Dashboard. Wichtig: <strong>über die GitHub-Pages-Adresse öffnen</strong>,
-  nicht per Doppelklick auf die Datei — sonst ist das Ergebnis nicht aussagekräftig.
-</p>
-
-<p>
-  So kommst du an den Link: Excel-Datei in OneDrive (privates Konto) → <em>Teilen</em> →
-  <em>Link kopieren</em> → Zugriff auf <em>„Jeder mit dem Link"</em> stellen. Dann hier einfügen:
+  Sie ändert nichts am Dashboard und schreibt nichts in die Datei. Wichtig:
+  <strong>über die GitHub-Pages-Adresse öffnen</strong>, nicht per Doppelklick auf die Datei.
 </p>
 
 <input id="shareUrl" type="text" placeholder="https://1drv.ms/x/... oder https://onedrive.live.com/...">
 <button id="run">Verbindung testen</button>
 
 <div id="out"></div>
+<div id="verdict" hidden></div>
 
 <script>
 const out = document.getElementById('out');
+const verdictBox = document.getElementById('verdict');
 
 function log(html) { out.innerHTML += html; }
 
-// OneDrive-Freigabelink → API-Adresse, die den Dateiinhalt liefert.
+// OneDrive-Freigabelink → Kennung für die shares-API:
 // Basis64 in der URL-safe-Variante, ohne Padding, mit "u!" davor.
-function toShareApiUrl(shareUrl) {
+function shareToken(shareUrl) {
   const b64 = btoa(shareUrl).replace(/=+$/, '').replace(/\//g, '_').replace(/\+/g, '-');
-  return `https://api.onedrive.com/v1.0/shares/u!${b64}/root/content`;
+  return `u!${b64}`;
 }
 
-async function test() {
-  out.innerHTML = '';
-  const shareUrl = document.getElementById('shareUrl').value.trim();
-
-  if (!shareUrl.startsWith('http')) {
-    log('<p class="fail">Bitte erst einen Freigabelink einfügen.</p>');
-    return;
-  }
-  if (shareUrl.includes('sharepoint.com')) {
-    log(`<p class="fail">Das ist ein Firmen-/SharePoint-Link.</p>
-         <p class="hint">Anonyme Zugriffe sind dort in der Regel gesperrt, und Freizeit-Daten
-         gehören ohnehin nicht ins Firmenkonto. Bitte ein privates OneDrive nutzen.</p>`);
-    return;
-  }
-
-  const apiUrl = toShareApiUrl(shareUrl);
-  log(`<p>Abgefragte Adresse:</p><pre>${apiUrl}</pre><p>Lade …</p>`);
-
-  let response;
+// Ein Zugriffsversuch. Liefert, was passiert ist — ohne zu werfen.
+async function attempt(url, asJson) {
   try {
-    response = await fetch(apiUrl, { cache: 'no-store' });
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) {
+      return { state: 'http', status: response.status, statusText: response.statusText };
+    }
+    const payload = asJson ? await response.json() : await response.arrayBuffer();
+    return { state: 'ok', payload };
   } catch (error) {
-    log(`<p class="fail">❌ Fehlgeschlagen — der Browser hat die Anfrage blockiert.</p>
-         <p>Das ist mit hoher Wahrscheinlichkeit die CORS-Sperre, also genau der Fall,
-         für den Variante A nicht funktioniert. Meldung: <code>${error.message}</code></p>
-         <p class="hint">Schau zur Sicherheit in die Browser-Konsole (F12). Steht dort etwas von
-         „Access-Control-Allow-Origin", ist es bestätigt CORS — dann brauchen wir Variante C (Proxy)
-         oder D (Eingabemaske).</p>`);
-    return;
+    // Ein geworfener fetch bedeutet fast immer: der Browser hat die Antwort
+    // blockiert, weil der Server keinen CORS-Header gesetzt hat.
+    return { state: 'blocked', message: error.message };
   }
+}
 
-  if (!response.ok) {
-    log(`<p class="fail">❌ Der Server hat abgelehnt: HTTP ${response.status} ${response.statusText}</p>
-         <p class="hint">CORS war hier nicht das Problem — die Anfrage kam durch. Vermutlich ist der
-         Link nicht öffentlich freigegeben oder abgelaufen.</p>`);
-    return;
+function describe(result) {
+  if (result.state === 'ok') {
+    return '<span class="ok">✅ durchgekommen</span>';
   }
+  if (result.state === 'http') {
+    return `<span class="warn">⚠️ abgelehnt: HTTP ${result.status} ${result.statusText}</span>
+            <span class="hint">— die Anfrage kam durch, CORS war hier nicht das Problem.
+            Vermutlich ist der Link nicht öffentlich freigegeben.</span>`;
+  }
+  return `<span class="fail">❌ vom Browser blockiert</span>
+          <span class="hint">— mit hoher Wahrscheinlichkeit CORS. Meldung: ${result.message}</span>`;
+}
 
-  log('<p class="ok">✅ Datei geladen — CORS ist kein Hindernis!</p>');
-
+function showWorkbook(buffer) {
   try {
-    const buffer = await response.arrayBuffer();
     const workbook = XLSX.read(buffer, { type: 'array' });
-
-    log(`<p>Gefundene Tabellenblätter: <strong>${workbook.SheetNames.join(', ')}</strong></p>`);
+    log(`<p class="ok">Datei gelesen. Tabellenblätter: <strong>${workbook.SheetNames.join(', ')}</strong></p>`);
 
     workbook.SheetNames.forEach(name => {
       const rows = XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1, blankrows: false });
       const preview = rows.slice(0, 6).map(r => JSON.stringify(r)).join('\n');
       log(`<p>Blatt „${name}" — ${rows.length} Zeilen, erste davon:</p><pre>${preview}</pre>`);
     });
-
-    log(`<p class="ok">Fertig. Sag mir die Namen der beiden Blätter, dann verdrahte ich das Dashboard damit.</p>`);
+    return true;
   } catch (error) {
     log(`<p class="fail">Die Datei kam an, ließ sich aber nicht als Excel lesen: ${error.message}</p>
-         <p class="hint">Ist es wirklich eine .xlsx-Datei? Ältere .xls oder .csv brauchen eine andere Behandlung.</p>`);
+         <p class="hint">Ist es wirklich eine .xlsx? Ältere .xls oder .csv brauchen eine andere Behandlung.</p>`);
+    return false;
   }
+}
+
+function verdict(html) {
+  verdictBox.hidden = false;
+  verdictBox.innerHTML = html;
+}
+
+async function test() {
+  out.innerHTML = '';
+  verdictBox.hidden = true;
+  const shareUrl = document.getElementById('shareUrl').value.trim();
+
+  if (!shareUrl.startsWith('http')) {
+    verdict('<p class="fail">Bitte erst einen Freigabelink einfügen.</p>');
+    return;
+  }
+  if (shareUrl.includes('sharepoint.com')) {
+    verdict(`<p class="fail">Das ist ein Firmen-/Hochschul-Link (SharePoint).</p>
+             <p class="hint">Anonyme Zugriffe sind dort gesperrt. Es braucht ein privates
+             Microsoft-Konto, dessen Links mit 1drv.ms oder onedrive.live.com beginnen.</p>`);
+    return;
+  }
+
+  const token = shareToken(shareUrl);
+
+  // ---- Weg 1: Dateiinhalt direkt über die shares-API ----
+  const contentUrl = `https://api.onedrive.com/v1.0/shares/${token}/root/content`;
+  log(`<div class="step"><h2>Weg 1 — Dateiinhalt über die shares-API</h2>
+       <pre>${contentUrl}</pre><p>Lade …</p></div>`);
+  const direct = await attempt(contentUrl, false);
+  log(`<div class="step"><p>${describe(direct)}</p></div>`);
+
+  if (direct.state === 'ok' && showWorkbook(direct.payload)) {
+    verdict(`<p class="ok">✅ Variante A funktioniert.</p>
+             <p>Schick mir den <strong>Anzeigen</strong>-Link und die Namen der beiden Blätter,
+             dann verdrahte ich das Dashboard damit.</p>`);
+    return;
+  }
+
+  // ---- Weg 2: nur die Metadaten. Trennt "dein Link" von "Microsofts Download-Server" ----
+  const metaUrl = `https://api.onedrive.com/v1.0/shares/${token}/driveItem`;
+  log(`<div class="step"><h2>Weg 2 — nur die Metadaten (Diagnose)</h2>
+       <pre>${metaUrl}</pre><p>Lade …</p></div>`);
+  const meta = await attempt(metaUrl, true);
+  log(`<div class="step"><p>${describe(meta)}</p></div>`);
+
+  let downloadUrl = null;
+  if (meta.state === 'ok') {
+    const item = meta.payload;
+    downloadUrl = item['@content.downloadUrl'] || item['@microsoft.graph.downloadUrl'] || null;
+    log(`<div class="step"><p>Gefundene Datei: <strong>${item.name || '(ohne Namen)'}</strong>,
+         ${item.size ?? '?'} Bytes</p>
+         <p class="hint">Der Link ist also gültig und öffentlich erreichbar.</p></div>`);
+  }
+
+  // ---- Weg 3: die echte Download-Adresse aus Weg 2 ----
+  if (downloadUrl) {
+    log(`<div class="step"><h2>Weg 3 — echte Download-Adresse</h2>
+         <p class="hint">Host: ${new URL(downloadUrl).host}</p><p>Lade …</p></div>`);
+    const viaDownload = await attempt(downloadUrl, false);
+    log(`<div class="step"><p>${describe(viaDownload)}</p></div>`);
+
+    if (viaDownload.state === 'ok' && showWorkbook(viaDownload.payload)) {
+      verdict(`<p class="ok">✅ Es geht — über den Umweg der Download-Adresse.</p>
+               <p>Wichtig: diese Adresse ist zeitlich befristet, das Dashboard muss sie
+               bei jedem Durchlauf neu holen. Sag mir Bescheid, ich baue es so.</p>`);
+      return;
+    }
+  }
+
+  // ---- Auswertung ----
+  if (meta.state === 'http') {
+    verdict(`<p class="warn">Der Link ist nicht öffentlich erreichbar (HTTP ${meta.status}).</p>
+             <p>Prüfe in OneDrive: <em>Teilen</em> → Zugriff auf <strong>„Jeder mit dem Link"</strong>,
+             Berechtigung <strong>Anzeigen</strong>. Ein Link, der nur für dich oder für bestimmte
+             Personen gilt, kann von der Website nicht gelesen werden.</p>
+             <p class="hint">Das ist noch kein Aus für Variante A — erst danach wissen wir es.</p>`);
+    return;
+  }
+
+  if (meta.state === 'ok') {
+    verdict(`<p class="fail">❌ Variante A ist damit erledigt.</p>
+             <p>Dein Link ist in Ordnung — die Metadaten kamen durch. Aber Microsofts
+             Download-Server erlaubt dem Browser den Zugriff auf den Dateiinhalt nicht.
+             Das kannst du nicht umstellen, das entscheidet Microsoft.</p>
+             <p>Bleiben <strong>Variante C</strong> (kleiner Proxy davor) oder
+             <strong>Variante D</strong> (Eingabemaske direkt in der Seite).</p>`);
+    return;
+  }
+
+  verdict(`<p class="fail">❌ Beide Wege wurden vom Browser blockiert.</p>
+           <p>Das ist die CORS-Sperre — Variante A funktioniert für dieses Konto nicht.
+           Bleiben <strong>Variante C</strong> (Proxy) oder <strong>Variante D</strong>
+           (Eingabemaske in der Seite).</p>
+           <p class="hint">Zur Gegenprobe kannst du in der Browser-Konsole (F12) nachsehen:
+           steht dort „Access-Control-Allow-Origin", ist es bestätigt.</p>`);
 }
 
 document.getElementById('run').addEventListener('click', test);
