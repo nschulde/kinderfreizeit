@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>OneDrive/Excel Verbindungstest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 60rem; margin: 0 auto; padding: 1.5rem;
+           background: #111827; color: #f9fafb; line-height: 1.5; }
+    h1 { font-size: 1.5rem; }
+    input, button { font-size: 1rem; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #4b5563; }
+    input { width: 100%; box-sizing: border-box; background: #1f2937; color: #f9fafb; margin-bottom: 0.75rem; }
+    button { background: #2563eb; color: white; border: none; cursor: pointer; font-weight: 600; }
+    pre { background: #1f2937; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.85rem; }
+    .ok { color: #4ade80; font-weight: 700; }
+    .fail { color: #f87171; font-weight: 700; }
+    .hint { color: #9ca3af; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<h1>🔌 Verbindungstest: Excel aus OneDrive</h1>
+
+<p class="hint">
+  Diese Seite prüft nur eins: Darf der Browser die Excel-Datei aus deinem OneDrive laden?
+  Sie ändert nichts am Dashboard. Wichtig: <strong>über die GitHub-Pages-Adresse öffnen</strong>,
+  nicht per Doppelklick auf die Datei — sonst ist das Ergebnis nicht aussagekräftig.
+</p>
+
+<p>
+  So kommst du an den Link: Excel-Datei in OneDrive (privates Konto) → <em>Teilen</em> →
+  <em>Link kopieren</em> → Zugriff auf <em>„Jeder mit dem Link"</em> stellen. Dann hier einfügen:
+</p>
+
+<input id="shareUrl" type="text" placeholder="https://1drv.ms/x/... oder https://onedrive.live.com/...">
+<button id="run">Verbindung testen</button>
+
+<div id="out"></div>
+
+<script>
+const out = document.getElementById('out');
+
+function log(html) { out.innerHTML += html; }
+
+// OneDrive-Freigabelink → API-Adresse, die den Dateiinhalt liefert.
+// Basis64 in der URL-safe-Variante, ohne Padding, mit "u!" davor.
+function toShareApiUrl(shareUrl) {
+  const b64 = btoa(shareUrl).replace(/=+$/, '').replace(/\//g, '_').replace(/\+/g, '-');
+  return `https://api.onedrive.com/v1.0/shares/u!${b64}/root/content`;
+}
+
+async function test() {
+  out.innerHTML = '';
+  const shareUrl = document.getElementById('shareUrl').value.trim();
+
+  if (!shareUrl.startsWith('http')) {
+    log('<p class="fail">Bitte erst einen Freigabelink einfügen.</p>');
+    return;
+  }
+  if (shareUrl.includes('sharepoint.com')) {
+    log(`<p class="fail">Das ist ein Firmen-/SharePoint-Link.</p>
+         <p class="hint">Anonyme Zugriffe sind dort in der Regel gesperrt, und Freizeit-Daten
+         gehören ohnehin nicht ins Firmenkonto. Bitte ein privates OneDrive nutzen.</p>`);
+    return;
+  }
+
+  const apiUrl = toShareApiUrl(shareUrl);
+  log(`<p>Abgefragte Adresse:</p><pre>${apiUrl}</pre><p>Lade …</p>`);
+
+  let response;
+  try {
+    response = await fetch(apiUrl, { cache: 'no-store' });
+  } catch (error) {
+    log(`<p class="fail">❌ Fehlgeschlagen — der Browser hat die Anfrage blockiert.</p>
+         <p>Das ist mit hoher Wahrscheinlichkeit die CORS-Sperre, also genau der Fall,
+         für den Variante A nicht funktioniert. Meldung: <code>${error.message}</code></p>
+         <p class="hint">Schau zur Sicherheit in die Browser-Konsole (F12). Steht dort etwas von
+         „Access-Control-Allow-Origin", ist es bestätigt CORS — dann brauchen wir Variante C (Proxy)
+         oder D (Eingabemaske).</p>`);
+    return;
+  }
+
+  if (!response.ok) {
+    log(`<p class="fail">❌ Der Server hat abgelehnt: HTTP ${response.status} ${response.statusText}</p>
+         <p class="hint">CORS war hier nicht das Problem — die Anfrage kam durch. Vermutlich ist der
+         Link nicht öffentlich freigegeben oder abgelaufen.</p>`);
+    return;
+  }
+
+  log('<p class="ok">✅ Datei geladen — CORS ist kein Hindernis!</p>');
+
+  try {
+    const buffer = await response.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: 'array' });
+
+    log(`<p>Gefundene Tabellenblätter: <strong>${workbook.SheetNames.join(', ')}</strong></p>`);
+
+    workbook.SheetNames.forEach(name => {
+      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1, blankrows: false });
+      const preview = rows.slice(0, 6).map(r => JSON.stringify(r)).join('\n');
+      log(`<p>Blatt „${name}" — ${rows.length} Zeilen, erste davon:</p><pre>${preview}</pre>`);
+    });
+
+    log(`<p class="ok">Fertig. Sag mir die Namen der beiden Blätter, dann verdrahte ich das Dashboard damit.</p>`);
+  } catch (error) {
+    log(`<p class="fail">Die Datei kam an, ließ sich aber nicht als Excel lesen: ${error.message}</p>
+         <p class="hint">Ist es wirklich eine .xlsx-Datei? Ältere .xls oder .csv brauchen eine andere Behandlung.</p>`);
+  }
+}
+
+document.getElementById('run').addEventListener('click', test);
+</script>
+</body>
+</html>
