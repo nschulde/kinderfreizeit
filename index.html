@@ -48,6 +48,12 @@
       overflow-wrap: break-word;
     }
 
+    /* Umschaltbare Ansicht: nur Tagesablauf, Medaillenspiegel weggeklappt.
+       Die ID-Selektoren sind bewusst spezifischer als die Tailwind-Klassen
+       am Element, damit sie deren Breitenangaben ueberschreiben. */
+    body.nur-tagesablauf #spalte-medaillen { display: none; }
+    body.nur-tagesablauf #spalte-plan { width: 100%; height: 100%; }
+
     /* Kleiner Kniff für Flaggen-Bilder, damit sie immer schön rund/eckig passen */
     .team-flag {
       font-size: var(--fs-flagge);
@@ -71,7 +77,13 @@
     00:00:00
   </div>
 
-  <div class="w-full md:w-1/2 h-1/2 md:h-full min-h-0 flex flex-col p-2 md:p-6 border-b md:border-b-0 md:border-r border-gray-700">
+  <button id="toggle-medaillen" type="button" title="Medaillenspiegel ein- oder ausblenden"
+          class="absolute top-2 left-3 z-30 font-medium bg-black/60 hover:bg-black/80 px-3 py-1.5 rounded-xl shadow-lg border border-gray-700 transition-colors cursor-pointer"
+          style="font-size: var(--fs-uhr)">
+    🏅 ausblenden
+  </button>
+
+  <div id="spalte-medaillen" class="w-full md:w-1/2 h-1/2 md:h-full min-h-0 flex flex-col p-2 md:p-6 border-b md:border-b-0 md:border-r border-gray-700">
     <h1 class="text-center font-extrabold tracking-tight flex-shrink-0 pr-28 md:pr-0"
         style="font-size: var(--fs-titel)">
       🏅 Medaillenspiegel
@@ -82,7 +94,7 @@
     </div>
   </div>
 
-  <div class="w-full md:w-1/2 h-1/2 md:h-full min-h-0 flex flex-col bg-gray-800 p-2 md:p-6">
+  <div id="spalte-plan" class="w-full md:w-1/2 h-1/2 md:h-full min-h-0 flex flex-col bg-gray-800 p-2 md:p-6">
     <h2 class="text-center font-bold text-gray-200 flex-shrink-0 pr-28 md:pr-32"
         style="font-size: var(--fs-titel)">
       📅 Tagesablauf
@@ -188,6 +200,13 @@ async function updateDashboard() {
 function updateClock() {
   document.getElementById('clock').innerText = new Date().toLocaleTimeString('de-DE');
 }
+
+// Medaillenspiegel ein-/ausblenden
+const toggleButton = document.getElementById('toggle-medaillen');
+toggleButton.addEventListener('click', () => {
+  const istVersteckt = document.body.classList.toggle('nur-tagesablauf');
+  toggleButton.textContent = istVersteckt ? '🏅 einblenden' : '🏅 ausblenden';
+});
 
 updateDashboard();
 updateClock();
