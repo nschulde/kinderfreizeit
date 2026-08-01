@@ -17,7 +17,9 @@
        ========================================== */
     :root {
       --fs-titel:   clamp(1.1rem,  4.2vh, 3.4rem);
-      --fs-team:    clamp(1rem,    4vh,   2.9rem);
+      /* min(vh, vw): der Teamname richtet sich nach Hoehe UND Breite,
+         damit auch lange Namen wie "Standhaftigkeit" ganz hineinpassen */
+      --fs-team:    clamp(0.85rem, min(4vh, 2.1vw), 2.9rem);
       --fs-medaille: clamp(0.85rem, 3.4vh, 2.5rem);
       --fs-platz:   clamp(0.55rem, 1.7vh, 1.2rem);
       --fs-flagge:  clamp(1.5rem,  6vh,   4.5rem);
@@ -33,6 +35,17 @@
     .team-karte {
       flex: 1 1 0;
       min-height: 0;
+    }
+
+    /* Teamname wird nie abgeschnitten. Reicht der Platz trotz der
+       breitenabhaengigen Schriftgroesse nicht, wird umgebrochen –
+       bei langen Woertern mit Silbentrennung (funktioniert durch
+       lang="de" im html-Tag). */
+    .team-name {
+      font-size: var(--fs-team);
+      line-height: 1.1;
+      hyphens: auto;
+      overflow-wrap: break-word;
     }
 
     /* Kleiner Kniff für Flaggen-Bilder, damit sie immer schön rund/eckig passen */
@@ -142,7 +155,7 @@ async function updateDashboard() {
             ${flagContent}
             <div class="min-w-0">
               <span class="opacity-70 block font-mono leading-none" style="font-size: var(--fs-platz)">${index + 1}. Platz</span>
-              <h2 class="font-bold truncate leading-tight" style="font-size: var(--fs-team)">${team.name}</h2>
+              <h2 class="team-name font-bold">${team.name}</h2>
             </div>
           </div>
           <div class="flex gap-2 md:gap-6 font-black bg-black/20 px-2 py-1 md:px-5 md:py-3 rounded-2xl backdrop-blur-sm border border-white/10 flex-shrink-0"
