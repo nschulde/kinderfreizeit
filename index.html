@@ -162,7 +162,7 @@ async function updateDashboard() {
 
     const scheduleContainer = document.getElementById('schedule');
     scheduleContainer.innerHTML = scheduleRows.map(row => `
-      <div class="border-b border-gray-600 pb-1 md:pb-3 text-center md:text-left">
+      <div class="border-b border-gray-600 pb-1 md:pb-3 text-center">
         <span class="text-gray-200 font-medium" style="font-size: var(--fs-plan)">${row[0]}</span>
       </div>
     `).join('');
