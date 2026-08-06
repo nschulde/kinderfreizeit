@@ -54,6 +54,11 @@
     body.nur-tagesablauf #spalte-medaillen { display: none; }
     body.nur-tagesablauf #spalte-plan { width: 100%; height: 100%; }
 
+    /* Eigene Teamfarbe, die es als Tailwind-Klasse nicht gibt.
+       Hier definiert statt als bg-[#...], damit sie auch dann sicher
+       greift, wenn die Karten per JavaScript eingefuegt werden. */
+    .bg-geduld { background-color: #B4CDCD; }
+
     /* Kleiner Kniff für Flaggen-Bilder, damit sie immer schön rund/eckig passen */
     .team-flag {
       font-size: var(--fs-flagge);
@@ -118,6 +123,7 @@ const TEAM_CONFIG = {
   "Standhaftigkeit": { color: "bg-gray-950 text-white border border-gray-600", flag: "🏆" },
   "Hoffnung":    { color: "bg-green-600 text-white", flag: "🏆" },
   "Liebe":     { color: "bg-red-600 text-white", flag: "🏆" },
+  "Geduld":    { color: "bg-geduld text-black", flag: "🏆" },
   // Falls ein Teamname im Sheet nicht gefunden wird, nutzt er das hier:
   "Standard":     { color: "bg-gray-700 text-white", flag: "🏅" }
 };
